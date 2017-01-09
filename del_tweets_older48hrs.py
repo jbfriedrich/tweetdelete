@@ -2,6 +2,7 @@
 
 import twitter
 import datetime
+import time
 
 api = twitter.Api(
     consumer_key        = '',
@@ -10,10 +11,11 @@ api = twitter.Api(
     access_token_secret = ''
 )
 
-user        = 'twitter-user'
+user        = 'twitterhandle'
 now         = datetime.datetime.utcnow()
 cutoff_date = now - datetime.timedelta(hours=48)
 statuses    = api.GetUserTimeline(user_id = user, count = '200')
+skip_tweets = str(["123456789012345678", "123456789012345678"])
 
 print "Time now    : %s" % (now)
 print "Cutoff date : %s" % (cutoff_date)
@@ -22,7 +24,7 @@ for s in statuses:
     tweetid     = str(s.id)
     tweetdate   = str(s.created_at)
 
-    if tweetid == '123456789012345678':
+    if tweetid in skip_tweets:
         print 'Skipping tweet %s as specified' % (tweetid)
         continue
     else:
@@ -53,11 +55,13 @@ for s in statuses:
             print "Deleting tweet %s (%s)" % (tweetid, tweetdate)
             try:
                 api.DestroyStatus(tweetid)
+                time.sleep(15)
             except twitter.TwitterError:
                 print "ERR: Tweet with ID %s could not be deleted" % (tweetid)
+
         else:
             print "Skipping tweet %s" % (tweetid)
-            print "Tweet date %s younger than cutoff date %s" %(
+            print "Tweet date %s earlier than cutoff date %s" %(
                 tweetdate,
                 cutoff_date
             )
